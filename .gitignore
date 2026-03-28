@@ -1,0 +1,18 @@
+# Pastas de dependências (MUITO importante)
+node_modules/
+
+# Arquivos do sistema
+.DS_Store
+Thumbs.db
+
+# Arquivos de log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Pastas de build (se você usar React, Vue, etc.)
+dist/
+build/
+
+# Arquivos com senhas ou chaves (Segurança!)
+.env
