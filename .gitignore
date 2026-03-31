@@ -16,3 +16,7 @@ build/
 
 # Arquivos com senhas ou chaves (Segurança!)
 .env
+.DS_Store
+node_modules/
+.env
+*.log

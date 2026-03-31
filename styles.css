@@ -601,6 +601,14 @@ h4 {
   display: grid;
   gap: 12px;
 }
+.hp-field {
+  position: absolute;
+  left: -10000px;
+  top: auto;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
 .field {
   display: grid;
   gap: 6px;

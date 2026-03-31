@@ -1,4 +1,7 @@
 (() => {
+  const PAGE_LOADED_AT = Date.now();
+  const MIN_SUBMIT_DELAY_MS = 900;
+
   const CONFIG = {
     companyName: "MASTER ELEVADORES",
     whatsapp: {
@@ -125,9 +128,29 @@
   }
 
   function waLink(msg) {
-    const base = `https://wa.me/${CONFIG.whatsapp.phoneE164}`;
+    const lpPhone = window.LP_CONFIG && window.LP_CONFIG.whatsappPhoneE164;
+    const phone =
+      (typeof lpPhone === "string" && lpPhone.trim() ? lpPhone.trim() : "") || CONFIG.whatsapp.phoneE164;
+    const base = `https://wa.me/${phone}`;
     const text = encodeURIComponent(msg);
     return `${base}?text=${text}`;
+  }
+
+  async function submitLeadToApi(payload) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 12000);
+    try {
+      const r = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+      const data = await r.json().catch(() => ({}));
+      return { ok: r.ok && data && data.ok, status: r.status, data };
+    } finally {
+      clearTimeout(timeout);
+    }
   }
 
   function template(str, data) {
@@ -260,7 +283,7 @@
 
     if (!msg && id === "telefone") {
       const digits = normalizePhoneDigits(value);
-      if (digits.length < 10) msg = "Informe um telefone válido (apenas números, com DDD).";
+      if (!/^\d{10,13}$/.test(digits)) msg = "Informe um telefone válido (somente números, com DDD).";
     }
 
     if (err) err.textContent = msg;
@@ -273,6 +296,7 @@
     if (!form) return;
     const inputs = $$("input,select,textarea", form);
     const tel = $("#telefone");
+    const honeypot = form.querySelector('input[name="address"]');
 
     if (tel) {
       tel.addEventListener(
@@ -302,6 +326,24 @@
       e.preventDefault();
       const errRecaptcha = $("#err-recaptcha");
       if (errRecaptcha) errRecaptcha.textContent = "";
+      const btn = form.querySelector('button[type="submit"]');
+      const btnText = btn ? btn.textContent : "";
+      const setBusy = (busy) => {
+        if (!btn) return;
+        btn.disabled = !!busy;
+        btn.setAttribute("aria-busy", busy ? "true" : "false");
+        btn.textContent = busy ? "Enviando..." : btnText;
+      };
+
+      if (Date.now() - PAGE_LOADED_AT < MIN_SUBMIT_DELAY_MS) {
+        track("spam_blocked", { reason: "too_fast" });
+        return;
+      }
+
+      if (honeypot && (honeypot.value ?? "").toString().trim()) {
+        track("spam_blocked", { reason: "honeypot" });
+        return;
+      }
 
       const ok = inputs.map(validateField).every(Boolean);
       if (!ok) {
@@ -315,16 +357,19 @@
       const siteKey =
         (typeof lp === "string" && lp.trim() ? lp.trim() : "") || CONFIG.recaptchaSiteKey || "";
 
+      setBusy(true);
+      let recaptchaToken = null;
       if (siteKey) {
         try {
-          const token = await runRecaptchaV3(siteKey);
-          if (!token) throw new Error("no_token");
+          recaptchaToken = await runRecaptchaV3(siteKey);
+          if (!recaptchaToken) throw new Error("no_token");
           track("recaptcha_ok", {});
         } catch {
           track("form_recaptcha_error", {});
           if (errRecaptcha) {
             errRecaptcha.textContent = "Não foi possível validar o envio. Atualize a página e tente de novo.";
           }
+          setBusy(false);
           return;
         }
       }
@@ -332,10 +377,28 @@
       const data = getLeadData();
       track("form_submit", { servico: data.servico, cidade: data.cidade });
 
+      const apiRes = await submitLeadToApi({
+        ...data,
+        address: honeypot ? (honeypot.value ?? "").toString() : "",
+        recaptchaToken,
+      }).catch(() => ({ ok: false, status: 0, data: {} }));
+
+      if (apiRes.ok) {
+        track("lead_api_ok", {});
+        setBusy(false);
+        form.reset();
+        updateWhatsAppLinks();
+        updateUrgentLinks();
+        if (errRecaptcha) errRecaptcha.textContent = "Recebido! Vamos te chamar em breve.";
+        return;
+      }
+      track("lead_api_fail", { status: apiRes.status });
+
       const msg = template(CONFIG.whatsapp.defaultMsg, {
         ...data,
         mensagem: data.mensagem || "(sem mensagem)",
       });
+      setBusy(false);
       window.location.href = waLink(msg);
     });
   }

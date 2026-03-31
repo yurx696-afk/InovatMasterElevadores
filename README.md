@@ -84,6 +84,7 @@ Se quiser integrar com CRM:
 
 - Publique em qualquer host estático (Netlify, Vercel, Cloudflare Pages, host próprio)
 - Garanta **HTTPS ativo**
-- Ajuste `robots.txt` e `sitemap.xml` com seu domínio real
+- Domínio oficial configurado: **https://inovatelevadoresmaster.com.br/**
+- `robots.txt` e `sitemap.xml` já apontam para esse domínio
 
 # InovatMaster
