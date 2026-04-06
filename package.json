@@ -1,0 +1,12 @@
+{
+  "name": "inovat-master-elevadores",
+  "version": "1.0.0",
+  "description": "Landing Page profissional para Inovat Master Elevadores",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "start": "npx serve ."
+  },
+  "author": "Yuri Rodrigues",
+  "license": "MIT"
+}
