@@ -79,13 +79,13 @@
 
         <nav class="top-nav" aria-label="Navegação">
           <a href="#servicos">Serviços</a>
-          <a href="#como-funciona">Como funciona</a>
           <a href="#prova-social">Clientes</a>
+          <a href="#como-funciona">Como funciona</a>
           <a href="#faq">FAQ</a>
         </nav>
 
         <div class="header-ctas">
-          <a class="btn btn-ghost" href="tel:+5561999999999" data-track="phone_top">Ligar</a>
+          <a class="btn btn-ghost" href="tel:+5561995755944" data-track="phone_top">Ligar</a>
           <a class="btn btn-whatsapp" href="#" id="whatsTop" data-track="whatsapp_top" aria-label="Falar no WhatsApp">
             WhatsApp
           </a>
@@ -121,8 +121,8 @@
             </div>
 
             <div class="hero-meta" aria-label="Contato rápido">
-              <span><strong>Telefone:</strong> <a href="tel:+5561999999999" data-track="phone_hero">+55 (61) 99999-9999</a></span>
-              <span><strong>E-mail:</strong> <a href="mailto:adm@inovatelevadoresmaster.com.br" data-track="email_hero">adm@inovatelevadoresmaster.com.br</a></span>
+              <span><strong>Telefone:</strong> <a href="tel:+5561995755944" data-track="phone_hero">+55 (61) 99575-5944</a></span>
+              <span><strong>E-mail:</strong> <a href="mailto:inovatelevadoresmaster@gmail.com" data-track="email_hero">inovatelevadoresmaster@gmail.com</a></span>
             </div>
           </div>
 
@@ -272,22 +272,6 @@
         </div>
       </section>
 
-      <section class="section trust" id="prova-social" aria-label="Por que nos escolher">
-        <div class="container">
-          <div class="section-head">
-            <h2>Por que escolher nossos serviços?</h2>
-          </div>
-          <div class="card trust-highlight-card">
-            <ul>
-              <li>✔️ Atendimento rápido para evitar paralisações</li>
-              <li>✔️ Técnicos qualificados e preparados</li>
-              <li>✔️ Manutenção dentro das normas de segurança</li>
-              <li>✔️ Redução de falhas e custos inesperados</li>
-            </ul>
-          </div>
-        </div>
-      </section>
-
       <section class="section services" id="servicos" aria-label="Serviços">
         <div class="container">
           <div class="section-head">
@@ -308,6 +292,22 @@
               <h3>Modernização</h3>
               <p>Atualização de comando, portas, botoeiras e cabine para segurança e desempenho.</p>
             </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="section trust" id="prova-social" aria-label="Por que nos escolher">
+        <div class="container">
+          <div class="section-head">
+            <h2>Por que escolher nossos serviços?</h2>
+          </div>
+          <div class="card trust-highlight-card">
+            <ul>
+              <li>✔️ Atendimento rápido para evitar paralisações</li>
+              <li>✔️ Técnicos qualificados e preparados</li>
+              <li>✔️ Manutenção dentro das normas de segurança</li>
+              <li>✔️ Redução de falhas e custos inesperados</li>
+            </ul>
           </div>
         </div>
       </section>
@@ -368,9 +368,9 @@
               <p class="muted">
                 <strong>CNPJ:</strong> 09.065.76/0001-06<br />
                 <strong>Endereço:</strong> Brasília/DF<br />
-                <strong>Telefone:</strong> <a href="tel:+5561999999999" data-track="phone_trust">+55 (61) 99999-9999</a><br />
+                <strong>Telefone:</strong> <a href="tel:+5561995755944" data-track="phone_trust">+55 (61) 99575-5944</a><br />
                 <strong>WhatsApp:</strong> <a href="#" id="whatsTrust" data-track="whatsapp_trust">Abrir conversa</a><br />
-                <strong>E-mail:</strong> <a href="mailto:adm@inovatelevadoresmaster.com.br" data-track="email_trust">adm@inovatelevadoresmaster.com.br</a>
+                <strong>E-mail:</strong> <a href="mailto:inovatelevadoresmaster@gmail.com" data-track="email_trust">inovatelevadoresmaster@gmail.com</a>
               </p>
               <p class="small muted">Atualize com os dados reais da sua empresa.</p>
             </div>
@@ -386,7 +386,7 @@
           </div>
 
           <div class="grid-2">
-            <form class="card form-card" id="leadForm" novalidate>
+            <form class="card form-card" id="leadForm" novalidate autocomplete="off">
               <div class="hp-field" aria-hidden="true">
                 <label for="address">Endereço</label>
                 <input
@@ -394,7 +394,9 @@
                   name="address"
                   type="text"
                   tabindex="-1"
-                  autocomplete="new-password"
+                  autocomplete="off"
+                  autocapitalize="off"
+                  spellcheck="false"
                   inputmode="text"
                   value=""
                 />
@@ -416,7 +418,7 @@
                   pattern="[0-9]*"
                   autocomplete="tel"
                   required
-                  placeholder="61999999999"
+                  placeholder="61995755944"
                   maxlength="13"
                 />
                 <div class="hint" id="err-telefone" aria-live="polite"></div>
@@ -457,6 +459,9 @@
                 <button class="btn btn-primary btn-lg" type="submit" data-track="form_submit">
                   Solicitar orçamento agora
                 </button>
+                <a class="btn btn-whatsapp btn-lg" href="#" id="whatsFormDirect" data-track="whatsapp_form_direct">
+                  Solicitar pelo WhatsApp
+                </a>
                 <p class="small muted">
                   Ao enviar, você pode ser direcionado ao WhatsApp com a mensagem preenchida (baixa fricção).
                 </p>
@@ -472,7 +477,7 @@
                 <a class="btn btn-urgent btn-lg" href="#" id="urgentAside" data-track="urgent_aside">Atendimento urgente</a>
                 <a
                   class="btn btn-whatsapp btn-lg"
-                  href="https://wa.me/5561999999999"
+                  href="https://wa.me/5561995755944"
                   target="_blank"
                   rel="noopener noreferrer"
                   >WhatsApp</a>
@@ -558,11 +563,11 @@
           <p class="small muted">Segurança, confiabilidade e rapidez — com conformidade e evidências.</p>
         </div>
         <div class="footer-contact">
-          <div><strong>Telefone:</strong> <a href="tel:+5561999999999" data-track="phone_footer">+55 (61) 99999-9999</a></div>
+          <div><strong>Telefone:</strong> <a href="tel:+5561995755944" data-track="phone_footer">+55 (61) 99575-5944</a></div>
           <div><strong>WhatsApp:</strong> <a href="#" id="whatsFooter" data-track="whatsapp_footer">Abrir conversa</a></div>
-          <div><strong>E-mail:</strong> <a href="mailto:adm@inovatelevadoresmaster.com.br" data-track="email_footer">adm@inovatelevadoresmaster.com.br</a></div>
-          <div><strong>Endereço:</strong> Brasília/DF</div>
+          <div><strong>E-mail:</strong> <a href="mailto:inovatelevadoresmaster@gmail.com" data-track="email_footer">inovatelevadoresmaster@gmail.com</a></div>
           <div><strong>CNPJ:</strong> 09.065.76/0001-06</div>
+          <div><strong>Endereço:</strong> Rua das Figueiras, Lote 07, Loja, 67, 68 e 69, Parte 298, Águas Claras Norte, Brasília DF, CEP: 71906-750</div>
         </div>
       </div>
       <div class="container footer-bottom">

@@ -5,7 +5,7 @@
   const CONFIG = {
     companyName: "MASTER ELEVADORES",
     whatsapp: {
-      phoneE164: "5561999999999",
+      phoneE164: "5561995755944",
       defaultMsg:
         "Olá! Quero solicitar um orçamento. Tipo de serviço: {{servico}}. Cidade: {{cidade}}. Nome: {{nome}}. Telefone: {{telefone}}. Mensagem: {{mensagem}}",
       urgentMsg:
@@ -337,11 +337,13 @@
 
       if (Date.now() - PAGE_LOADED_AT < MIN_SUBMIT_DELAY_MS) {
         track("spam_blocked", { reason: "too_fast" });
+        if (errRecaptcha) errRecaptcha.textContent = "Aguarde um instante e tente novamente.";
         return;
       }
 
       if (honeypot && (honeypot.value ?? "").toString().trim()) {
         track("spam_blocked", { reason: "honeypot" });
+        if (errRecaptcha) errRecaptcha.textContent = "Não foi possível validar o envio.";
         return;
       }
 
@@ -383,21 +385,20 @@
         recaptchaToken,
       }).catch(() => ({ ok: false, status: 0, data: {} }));
 
-      if (apiRes.ok) {
-        track("lead_api_ok", {});
-        setBusy(false);
-        form.reset();
-        updateWhatsAppLinks();
-        updateUrgentLinks();
-        if (errRecaptcha) errRecaptcha.textContent = "Recebido! Vamos te chamar em breve.";
-        return;
-      }
-      track("lead_api_fail", { status: apiRes.status });
-
       const msg = template(CONFIG.whatsapp.defaultMsg, {
         ...data,
         mensagem: data.mensagem || "(sem mensagem)",
       });
+
+      if (apiRes.ok) {
+        track("lead_api_ok", {});
+        setBusy(false);
+        // Mantém o comportamento esperado da landing: seguir para o WhatsApp.
+        window.location.href = waLink(msg);
+        return;
+      }
+      track("lead_api_fail", { status: apiRes.status });
+
       setBusy(false);
       window.location.href = waLink(msg);
     });
@@ -409,6 +410,7 @@
       "whatsHero",
       "whatsSolution",
       "whatsTrust",
+      "whatsFormDirect",
       "whatsAside",
       "whatsFinal",
       "whatsFooter",

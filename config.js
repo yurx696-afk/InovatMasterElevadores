@@ -13,6 +13,6 @@ window.LP_CONFIG.tracking = window.LP_CONFIG.tracking || {
 window.LP_CONFIG.recaptchaSiteKey = window.LP_CONFIG.recaptchaSiteKey || "";
 
 // WhatsApp phone (E.164 digits only) and domain (used by backend allowlist, optional).
-window.LP_CONFIG.whatsappPhoneE164 = window.LP_CONFIG.whatsappPhoneE164 || "5561999999999";
+window.LP_CONFIG.whatsappPhoneE164 = window.LP_CONFIG.whatsappPhoneE164 || "5561995755944";
 window.LP_CONFIG.allowedDomain = window.LP_CONFIG.allowedDomain || "inovatelevadoresmaster.com.br";
 

@@ -941,3 +941,10 @@ details p {
     transition: none;
   }
 }
+html {
+  scroll-behavior: smooth;
+}
+section {
+  /* Ajuste o valor (80px) de acordo com a altura do seu header */
+  scroll-margin-top: 80px; 
+}
