@@ -411,7 +411,6 @@
       "whatsSolution",
       "whatsTrust",
       "whatsFormDirect",
-      "whatsAside",
       "whatsFinal",
       "whatsFooter",
       "whatsSticky",

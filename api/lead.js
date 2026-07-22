@@ -1,6 +1,12 @@
+const MAX_BODY_BYTES = 20_000;
+const ALLOWED_SERVICOS = new Set(["Manutenção", "Instalação", "Modernização", "Inspeção / Laudo", "Outro"]);
+
 function json(res, status, body) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("X-Content-Type-Options", "nosniff");
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("X-Robots-Tag", "noindex");
   res.end(JSON.stringify(body));
 }
 
@@ -10,9 +16,19 @@ function getClientIp(req) {
   return ip || (req.socket && req.socket.remoteAddress) || "0.0.0.0";
 }
 
+// Only accept real strings from the parsed JSON body — objects/arrays/numbers
+// are treated as absent rather than coerced (avoids "[object Object]" leaking
+// into sanitized output and rejects unexpected payload shapes).
+function asString(v) {
+  return typeof v === "string" ? v : "";
+}
+
+function stripControlChars(str) {
+  return str.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "");
+}
+
 function sanitizePlainText(str, max) {
-  const cleaned = (str ?? "")
-    .toString()
+  const cleaned = stripControlChars(asString(str))
     .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
     .replace(/<[^>]*>/g, "")
     .replace(/[<>]/g, "")
@@ -22,11 +38,21 @@ function sanitizePlainText(str, max) {
 }
 
 function normalizePhoneDigits(v) {
-  return (v ?? "").toString().replace(/\D+/g, "");
+  return asString(v).replace(/\D+/g, "");
 }
 
 const rateState = new Map();
+let lastSweep = Date.now();
+function sweepExpired(windowMs) {
+  const now = Date.now();
+  if (now - lastSweep < windowMs) return;
+  lastSweep = now;
+  for (const [ip, entry] of rateState) {
+    if (now - entry.start > windowMs) rateState.delete(ip);
+  }
+}
 function rateLimit(ip, { windowMs = 60_000, max = 10 } = {}) {
+  sweepExpired(windowMs);
   const now = Date.now();
   const cur = rateState.get(ip);
   if (!cur || now - cur.start > windowMs) {
@@ -76,7 +102,20 @@ async function sendEmailResend({ from, to, subject, text }) {
 }
 
 export default async function handler(req, res) {
-  if (req.method !== "POST") return json(res, 405, { ok: false, error: "method_not_allowed" });
+  if (req.method !== "POST") {
+    res.setHeader("Allow", "POST");
+    return json(res, 405, { ok: false, error: "method_not_allowed" });
+  }
+
+  const contentType = (req.headers["content-type"] || "").toString();
+  if (!contentType.includes("application/json")) {
+    return json(res, 415, { ok: false, error: "unsupported_media_type" });
+  }
+
+  const contentLength = Number(req.headers["content-length"] || 0);
+  if (contentLength > MAX_BODY_BYTES) {
+    return json(res, 413, { ok: false, error: "payload_too_large" });
+  }
 
   const ip = getClientIp(req);
   const rl = rateLimit(ip, { windowMs: 60_000, max: 8 });
@@ -85,23 +124,27 @@ export default async function handler(req, res) {
 
   let body = req.body;
   if (typeof body === "string") {
+    if (body.length > MAX_BODY_BYTES) return json(res, 413, { ok: false, error: "payload_too_large" });
     try {
       body = JSON.parse(body);
     } catch {
       body = null;
     }
   }
-  if (!body || typeof body !== "object") return json(res, 400, { ok: false, error: "bad_json" });
+  if (!body || typeof body !== "object" || Array.isArray(body)) {
+    return json(res, 400, { ok: false, error: "bad_json" });
+  }
 
   // Honeypot
   if (sanitizePlainText(body.address, 200)) return json(res, 200, { ok: true, blocked: true });
 
   const nome = sanitizePlainText(body.nome, 60);
-  const servico = sanitizePlainText(body.servico, 40);
+  const servicoRaw = sanitizePlainText(body.servico, 40);
+  const servico = ALLOWED_SERVICOS.has(servicoRaw) ? servicoRaw : "";
   const cidade = sanitizePlainText(body.cidade, 60);
   const mensagem = sanitizePlainText(body.mensagem, 500);
   const telefone = normalizePhoneDigits(body.telefone).slice(0, 13);
-  const recaptchaToken = (body.recaptchaToken ?? "").toString();
+  const recaptchaToken = stripControlChars(asString(body.recaptchaToken)).slice(0, 2000);
 
   if (!nome || nome.length < 2) return json(res, 400, { ok: false, error: "invalid_nome" });
   if (!/^\d{10,13}$/.test(telefone)) return json(res, 400, { ok: false, error: "invalid_telefone" });
