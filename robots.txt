@@ -1,5 +1,5 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://inovatelevadoresmaster.com.br/sitemap.xml
+Sitemap: https://www.inovatelevadoresmaster.com.br/sitemap.xml
 
